@@ -20,7 +20,7 @@
                     <field name="sign_now" invisible="1" />
                     <field 
                         name="send_email" 
-                        string="Send Email to cliente?" 
+                        string="Enviar Email ao cliente?" 
                         help="Se selecionado, ao gerar o documento já será enviado ao cliente, se não, somente quando clicar no botão na tela da requisição" />
                     <field
                         name="message"

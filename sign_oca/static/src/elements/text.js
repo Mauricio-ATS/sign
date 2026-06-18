@@ -34,7 +34,7 @@ odoo.define("sign_oca.textElement", function (require) {
             });
             input.addEventListener("change", (ev) => {
                 this.change(ev.srcElement.value, parent, item, signatureItem);
-                if (item.name === "nome") {
+                if (item.name === "Nome") {
                     parent.env.services.rpc({
                         model: "res.partner",
                         method: "search_read",
@@ -50,9 +50,9 @@ odoo.define("sign_oca.textElement", function (require) {
                             const fieldMap = {
                                 "RG": partner.rg || "",
                                 "Phone": partner.phone || partner.mobile,
-                                "endereço": partner.street || "",
-                                "cidade": partner.city || "",
-                                "cep": partner.zip || "",
+                                "Endereço": partner.street || "",
+                                "Cidade": partner.city || "",
+                                "CEP": partner.zip || "",
                             };
                             for (const [id, signItem] of Object.entries(parent.info.items)) {
                                 if (fieldMap[signItem.name] !== undefined) {
