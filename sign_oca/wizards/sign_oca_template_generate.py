@@ -24,6 +24,7 @@ class SignOcaTemplateGenerate(models.TransientModel):
         default=lambda r: r._default_signers(),
     )
     sign_now = fields.Boolean()
+    send_email = fields.Boolean("Send Email", default=True)
     message = fields.Html()
 
     def _generate_vals(self):
@@ -50,7 +51,8 @@ class SignOcaTemplateGenerate(models.TransientModel):
 
     def generate(self):
         request = self._generate()
-        request.action_send(sign_now=self.sign_now, message=self.message)
+        if self.send_email:
+            request.action_send(sign_now=self.sign_now, message=self.message)
         return request.sign()
 
 

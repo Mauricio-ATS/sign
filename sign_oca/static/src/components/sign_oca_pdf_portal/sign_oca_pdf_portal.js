@@ -47,6 +47,12 @@ odoo.define("sign_oca.document_portal_base", function (require) {
                     "/" +
                     this.props.access_token,
                 params: {items: this.info.items},
+            }).then((result) => {
+                console.log(result);
+                alert("Documento assinado com sucesso!");
+                window.location.reload();
+            }).catch((error) => {
+                console.error("Erro ao assinar:", error);
             });
         }
     }

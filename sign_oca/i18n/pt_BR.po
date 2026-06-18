@@ -448,6 +448,11 @@ msgid "Generate & sign"
 msgstr "Gerar e Assinar"
 
 #. module: sign_oca
+#: model_terms:ir.ui.view,arch_db:sign_oca.sign_oca_template_generate_form_view
+msgid "Send Email to cliente?"
+msgstr "Enviar Email pro Cliente?"
+
+#. module: sign_oca
 #: model:ir.model,name:sign_oca.model_sign_oca_template_generate
 msgid "Generate a signature request"
 msgstr "Gerar uma requisição de assinatura"
@@ -653,6 +658,12 @@ msgstr "Erro de entrega de Mensagem"
 #: model:ir.model.fields,field_description:sign_oca.field_sign_oca_request__message_ids
 msgid "Messages"
 msgstr "Mensagens"
+
+#. odoo-python
+#: code:addons/sign_oca/models/sign_oca_request.py:269
+#, python-format
+msgid "Email sent to %s for signing document %s"
+msgstr "Email enviado para %s para assinar o documento %s"
 
 #. module: sign_oca
 #: model:ir.model.fields,field_description:sign_oca.field_sign_oca_request_signer__model

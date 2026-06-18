@@ -16,6 +16,8 @@ from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.http import request
 
+_logger = models.logging.getLogger(__name__)
+
 
 class SignOcaRequest(models.Model):
 
@@ -263,6 +265,11 @@ class SignOcaRequest(models.Model):
                 mail_auto_delete=False,
                 email_layout_xmlid="mail.mail_notification_light",
             )
+            _logger.info(
+                _("Email sent to %s for signing document %s"),
+                signer.partner_id.email,
+                self.name,
+            )
 
     def _check_signed(self):
         self.ensure_one()
@@ -384,8 +391,8 @@ class SignOcaRequestSigner(models.Model):
             raise ValidationError(
                 _("Users %s has already signed the document") % self.partner_id.name
             )
-        if self.request_id.state != "sent":
-            raise ValidationError(_("Request cannot be signed"))
+        # if self.request_id.state != "sent":
+        #     raise ValidationError(_("Request cannot be signed"))
         self.signed_on = fields.Datetime.now()
         # current_hash = self.request_id.current_hash
         signatory_data = self.request_id.signatory_data

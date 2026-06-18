@@ -18,6 +18,10 @@
                 <group>
                     <field name="template_id" invisible="1" />
                     <field name="sign_now" invisible="1" />
+                    <field 
+                        name="send_email" 
+                        string="Send Email to cliente?" 
+                        help="Se selecionado, ao gerar o documento já será enviado ao cliente, se não, somente quando clicar no botão na tela da requisição" />
                     <field
                         name="message"
                         attrs="{'invisible': [('sign_now', '=', True)]}"

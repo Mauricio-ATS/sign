@@ -34,6 +34,58 @@ odoo.define("sign_oca.textElement", function (require) {
             });
             input.addEventListener("change", (ev) => {
                 this.change(ev.srcElement.value, parent, item, signatureItem);
+                if (item.name === "nome") {
+                    parent.env.services.rpc({
+                        model: "res.partner",
+                        method: "search_read",
+                        args: [[["name", "ilike", ev.srcElement.value]]],
+                        kwargs: {
+                            fields: ["name", "rg", "email", "phone", "mobile", "street", "city", "zip", "state_id"],
+                            limit: 1,
+                        },
+                    }).then((partners) => {
+                        if (partners.length > 0) {
+                            const partner = partners[0];
+                            console.log(partner);
+                            const fieldMap = {
+                                "RG": partner.rg || "",
+                                "Phone": partner.phone || partner.mobile,
+                                "endereço": partner.street || "",
+                                "cidade": partner.city || "",
+                                "cep": partner.zip || "",
+                            };
+                            for (const [id, signItem] of Object.entries(parent.info.items)) {
+                                if (fieldMap[signItem.name] !== undefined) {
+                                    signItem.value = fieldMap[signItem.name];
+                                    // atualiza o input visualmente
+                                    const input = parent.items[id];
+                                    if (input) {
+                                        const inputEl = input.querySelector("input");
+                                        if (inputEl) {
+                                            inputEl.value = fieldMap[signItem.name];
+                                        }
+                                    }
+                                }
+                            }
+                            // PEGANDO CODIGO DO STATE
+                            parent.env.services.rpc({
+                                model: "res.country.state",
+                                method: "search_read",
+                                args: [[["id", "=", partner.state_id[0]]]],
+                                kwargs: { fields: ["code"], limit: 1 },
+                            }).then((states) => {
+                                if (states.length > 0) {
+                                    const ufItem = Object.values(parent.info.items).find(i => i.name === "UF");
+                                    if (ufItem) {
+                                        ufItem.value = states[0].code;
+                                        const inputEl = parent.items[ufItem.id]?.querySelector("input");
+                                        if (inputEl) inputEl.value = states[0].code;
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
             });
             input.addEventListener("keydown", (ev) => {
                 if ((ev.keyCode || ev.which) !== 9) {
