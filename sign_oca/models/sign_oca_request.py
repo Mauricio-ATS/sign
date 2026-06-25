@@ -31,6 +31,13 @@ class SignOcaRequest(models.Model):
     data = fields.Binary(
         required=True, readonly=True, states={"draft": [("readonly", False)]}
     )
+    mail_template_id = fields.Many2one(
+        "mail.template",
+        string="Modelo de Email",
+        domain="[('model_id.model', '=', 'sign.oca.request.log')]",
+    )
+
+    email_body=fields.Html("Corpo do email")
     user_id = fields.Many2one(
         comodel_name="res.users",
         string="Responsible",
@@ -94,6 +101,11 @@ class SignOcaRequest(models.Model):
         states={"draft": [("readonly", False)]},
     )
     next_item_id = fields.Integer(compute="_compute_next_item_id")
+
+    @api.onchange("mail_template_id")
+    def _onchange_mail_template_id(self):   
+        if self.mail_template_id:
+            self.email_body = self.mail_template_id.body_html
 
     @api.depends("signatory_data")
     def _compute_next_item_id(self):
@@ -252,8 +264,13 @@ class SignOcaRequest(models.Model):
             if sign_now and signer.partner_id == self.env.user.partner_id:
                 continue
             view = self.env.ref("sign_oca.sign_oca_template_mail")
+            body = message
+
+            if self.email_body:
+                body = self.email_body
+
             render_result = view._render(
-                {"record": signer, "body": message, "link": signer.access_url},
+                {"record": signer, "body": body, "link": signer.access_url},
                 engine="ir.qweb",
                 minimal_qcontext=True,
             )

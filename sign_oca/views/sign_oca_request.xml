@@ -104,6 +104,8 @@
                         />
                         <field name="user_id" />
                         <field name="record_ref" />
+                        <field name='mail_template_id'/>
+                        <field name='email_body'/>
                     </group>
 
                     <field name="signer_ids" nolabel="1">

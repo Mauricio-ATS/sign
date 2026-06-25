@@ -1,13 +1,26 @@
 # Copyright 2023 CreuBlana
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
-from odoo import fields, models
+from odoo import fields, models,api
 
 
 class SignOcaTemplateGenerate(models.TransientModel):
 
     _name = "sign.oca.template.generate"
     _description = "Generate a signature request"
+
+    mail_template_id = fields.Many2one(
+        "mail.template",
+        string="Modelo de Email",
+        domain="[('model_id.model', '=', 'sign.oca.request.log')]",
+    )
+    
+    @api.onchange("mail_template_id")
+    def _onchange_mail_template_id(self):
+        template = self.mail_template_id
+        if not template:
+            return
+        self.message = template.body_html or ""
 
     def _default_signers(self):
         template = self.env["sign.oca.template"].browse(

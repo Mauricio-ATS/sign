@@ -22,6 +22,7 @@
                         name="send_email" 
                         string="Enviar Email ao cliente?" 
                         help="Se selecionado, ao gerar o documento já será enviado ao cliente, se não, somente quando clicar no botão na tela da requisição" />
+                    <field name='mail_template_id'/>
                     <field
                         name="message"
                         attrs="{'invisible': [('sign_now', '=', True)]}"
