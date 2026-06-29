@@ -261,16 +261,17 @@ class SignOcaRequest(models.Model):
         self.state = "sent"
         for signer in self.signer_ids:
             signer._portal_ensure_token()
+            link = "/sign_oca/document/%s/%s" % (signer.id, signer.access_token)
+            _logger.info("TOKEN = %s", signer.access_token)
+            _logger.info("URL = %s", link)
             if sign_now and signer.partner_id == self.env.user.partner_id:
                 continue
             view = self.env.ref("sign_oca.sign_oca_template_mail")
             body = message
-
             if self.email_body:
                 body = self.email_body
-
             render_result = view._render(
-                {"record": signer, "body": body, "link": signer.access_url},
+                {"record": signer, "body": body, "link": link},
                 engine="ir.qweb",
                 minimal_qcontext=True,
             )
@@ -287,6 +288,7 @@ class SignOcaRequest(models.Model):
                 signer.partner_id.email,
                 self.name,
             )
+            _logger.info(render_result)
 
     def _check_signed(self):
         self.ensure_one()
@@ -360,7 +362,7 @@ class SignOcaRequestSigner(models.Model):
                 not item.signed_on
                 and item.partner_id == user.partner_id.commercial_partner_id
             )
-
+    @api.depends("access_token")
     def _compute_access_url(self):
         super()._compute_access_url()
         for record in self:
