@@ -106,6 +106,8 @@
                         <field name="record_ref" />
                         <field name='mail_template_id'/>
                         <field name='email_body'/>
+                        <field name='assunto'/>
+                        <field name='autor'/>
                     </group>
 
                     <field name="signer_ids" nolabel="1">

@@ -11,10 +11,11 @@ from reportlab.lib.colors import black, transparent
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Image, Paragraph
-
+from odoo.tools import html2plaintext
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.http import request
+from email.utils import parseaddr
 
 _logger = models.logging.getLogger(__name__)
 
@@ -38,6 +39,9 @@ class SignOcaRequest(models.Model):
     )
 
     email_body=fields.Html("Corpo do email")
+    assunto = fields.Html("Assunto")
+    autor = fields.Char("Autor")
+
     user_id = fields.Many2one(
         comodel_name="res.users",
         string="Responsible",
@@ -103,9 +107,11 @@ class SignOcaRequest(models.Model):
     next_item_id = fields.Integer(compute="_compute_next_item_id")
 
     @api.onchange("mail_template_id")
-    def _onchange_mail_template_id(self):   
+    def _onchange_mail_template_id(self):
         if self.mail_template_id:
             self.email_body = self.mail_template_id.body_html
+            self.assunto = self.mail_template_id.subject
+            self.autor = self.mail_template_id.email_from
 
     @api.depends("signatory_data")
     def _compute_next_item_id(self):
@@ -257,37 +263,57 @@ class SignOcaRequest(models.Model):
         self.ensure_one()
         if self.state != "draft":
             return
+
         self._set_action_log("validate")
         self.state = "sent"
+
+        subject = (
+            html2plaintext(self.assunto)
+            if self.assunto
+            else _("New document to sign")
+        )
+
         for signer in self.signer_ids:
             signer._portal_ensure_token()
             link = "/sign_oca/document/%s/%s" % (signer.id, signer.access_token)
+
             _logger.info("TOKEN = %s", signer.access_token)
             _logger.info("URL = %s", link)
+
             if sign_now and signer.partner_id == self.env.user.partner_id:
                 continue
+
             view = self.env.ref("sign_oca.sign_oca_template_mail")
-            body = message
-            if self.email_body:
-                body = self.email_body
-            render_result = view._render(
-                {"record": signer, "body": body, "link": link},
+
+            body = self.email_body if self.email_body else message
+            email_from = self.autor or self.env.user.email_formatted
+            render_result = view._render(   
+                {
+                    "record": signer,
+                    "body": body,
+                    "author": self.autor,
+                    "link": link,
+                    "subject": subject,
+                },
                 engine="ir.qweb",
                 minimal_qcontext=True,
             )
+
             self.env["mail.thread"].message_notify(
                 body=render_result,
                 partner_ids=signer.partner_id.ids,
-                subject=_("New document to sign"),
+                subject=subject,
                 subtype_id=self.env.ref("mail.mt_comment").id,
                 mail_auto_delete=False,
                 email_layout_xmlid="mail.mail_notification_light",
+                email_from= email_from,
             )
             _logger.info(
                 _("Email sent to %s for signing document %s"),
                 signer.partner_id.email,
                 self.name,
             )
+
             _logger.info(render_result)
 
     def _check_signed(self):

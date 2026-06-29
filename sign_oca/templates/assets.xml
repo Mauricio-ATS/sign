@@ -161,13 +161,13 @@
     <template t-name="sign_oca_template_mail">
         <div>
             <span>
-                <t t-esc="record.create_uid.name" />
-                (<a
+                <t t-raw="author" />
+                <a
                     t-att-href="'mailto:%s?subject=%s' % (record.create_uid.email, 'Re: %s' % subject)"
                     style="color:#428BCA; text-decoration:none;"
                     target="_blank"
-                ><t t-esc="record.create_uid.email" /></a>)
-                has requested your signature on a document.
+                ></a>
+                solicitou sua assinatura em um documento.
             </span>
             <span t-if="body">
                 <div
