@@ -20,7 +20,6 @@
                     <button
                         string="Send"
                         type="object"
-                        states="draft"
                         name="action_send"
                         icon="fa-paper-plane"
                     />
