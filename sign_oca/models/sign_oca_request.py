@@ -78,7 +78,7 @@ class SignOcaRequest(models.Model):
     state = fields.Selection(
         [
             ("draft", "Draft"),
-            ("sent", "Sent"),
+            ("sent", "Enviado"),
             ("signed", "Signed"),
             ("cancel", "Cancelled"),
         ],
@@ -261,8 +261,9 @@ class SignOcaRequest(models.Model):
 
     def action_send(self, sign_now=False, message=""):
         self.ensure_one()
-        if self.state != "draft":
-            return
+
+        if self.state =="cancel":
+            raise ValidationError(_("Você nao pode enviar uma requisição de assinatura que está cancelada."))
 
         self._set_action_log("validate")
         self.state = "sent"
@@ -299,14 +300,16 @@ class SignOcaRequest(models.Model):
                 minimal_qcontext=True,
             )
 
+            
             self.env["mail.thread"].message_notify(
                 body=render_result,
                 partner_ids=signer.partner_id.ids,
                 subject=subject,
+                author_id = self.env.user.partner_id.id,
                 subtype_id=self.env.ref("mail.mt_comment").id,
                 mail_auto_delete=False,
                 email_layout_xmlid="mail.mail_notification_light",
-                email_from= email_from,
+                email_from=email_from,
             )
             _logger.info(
                 _("Email sent to %s for signing document %s"),
