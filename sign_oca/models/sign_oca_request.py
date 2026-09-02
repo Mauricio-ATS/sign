@@ -42,6 +42,8 @@ class SignOcaRequest(models.Model):
     assunto = fields.Html("Assunto")
     autor = fields.Char("Autor")
 
+    ultimo_envio = fields.Datetime("Ultimo envio de email", store = True, readonly = True)
+
     user_id = fields.Many2one(
         comodel_name="res.users",
         string="Responsible",
@@ -317,6 +319,7 @@ class SignOcaRequest(models.Model):
                 self.name,
             )
 
+            self.ultimo_envio = fields.Datetime.now()
             _logger.info(render_result)
 
     def _check_signed(self):

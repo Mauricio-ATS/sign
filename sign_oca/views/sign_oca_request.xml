@@ -217,6 +217,7 @@
                 <field name="signer_ids" widget="many2many_tags" string="Signers" />
                 <field name="user_id" />
                 <field name="create_date" />
+                <field name="ultimo_envio" widget="datetime" optional="show" />
                 <field name="write_date" />
                 <field name="record_ref" />
                 <button
